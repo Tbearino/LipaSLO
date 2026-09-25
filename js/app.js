@@ -1,8 +1,13 @@
 /* ---------------- COURSE CONTENT (edit here) ---------------- */
 const LV={A1:window.LIPA_A1,A2:window.LIPA_A2,B1:window.LIPA_B1};
 
-const LVINFO={A1:{d:"Beginner course, level A1",top:"Šmarna gora, 669 m"},A2:{d:"Elementary course, level A2",top:"Triglav, 2864 m"},B1:{d:"Intermediate course, level B1",top:"Grossglockner, 3798 m"}};
-let lvl=(()=>{try{const l=localStorage.getItem("lipa-level");if(l&&LV[l])return l}catch(e){}return"A1"})();
+const LVINFO={
+  A1:{d:"Beginner course, level A1",top:"Šmarna gora, 669 m"},
+  A2:{d:"Elementary course, level A2",top:"Velika planina, 1666 m"},
+  B1:{d:"Intermediate course, level B1",top:"Snežnik, 1796 m"},
+  B2:{d:"Upper intermediate course, level B2",top:"Stol, 2236 m"},
+  C1:{d:"Advanced course, level C1",top:"Triglav, 2864 m"}
+};let lvl=(()=>{try{const l=localStorage.getItem("lipa-level");if(l&&LV[l])return l}catch(e){}return"A1"})();
 let C=LV[lvl];
 const K=(ci,li)=>(lvl==="A1"?"":lvl+":")+ci+"-"+li;
 const LN=[{n:"New words",ic:"book"},{n:"More words",ic:"cards"},{n:"Conversation",ic:"chat"},{n:"Grammar",ic:"blocks"},{n:"Chapter review",ic:"flag"}];
