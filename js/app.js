@@ -1,5 +1,5 @@
 /* ---------------- COURSE CONTENT (edit here) ---------------- */
-const LV={A1:window.LIPA_A1,A2:window.LIPA_A2,B1:window.LIPA_B1,B2:window.LIPA_B2};
+const LV={A1:window.LIPA_A1,A2:window.LIPA_A2,B1:window.LIPA_B1,B2:window.LIPA_B2,C1:window.LIPA_C1};
 
 const LVINFO={
   A1:{d:"Beginner course, level A1",top:"Šmarna gora, 669 m"},
@@ -104,7 +104,7 @@ function learnHTML(){
     <h2 class="sl">${C[nx[0]].t}</h2><p class="en">${C[nx[0]].e}</p>
     <button class="btn" data-start="${nx[0]}-${nx[1]}">${totalDone()?"Continue lesson":"Start your first lesson"}</button></section>`
    :`<section class="hero"><div class="leaf">${LEAF}</div><p class="meta">Course complete</p><h2 class="sl">Čestitke!</h2><p class="en">Congratulations, you've finished Slovenian ${lvl}. Keep your words fresh in Review.</p><button class="btn" data-view="review">Go to review</button></section>`;
-  const tabs=["A1","A2","B1","B2"].map((l,i)=>`<button class="tab" role="tab" aria-selected="${l===lvl}" ${LV[l]?`data-lvl="${l}"`:'disabled title="Coming soon"'}>${l}</button>`).join("");
+  const tabs=["A1","A2","B1","B2","C1"].map((l,i)=>`<button class="tab" role="tab" aria-selected="${l===lvl}" ${LV[l]?`data-lvl="${l}"`:'disabled title="Coming soon"'}>${l}</button>`).join("");
   const chs=C.map((c,ci)=>{
     const d=chDone(ci),p=d/5*100,cls=d===5?"full":d?"part":"";
     const rows=LN.map((l,li)=>{const k=ci+"-"+li,ok=S.done[K(ci,li)];return`<li><button class="lrow ${ok?"done":""}" data-start="${k}"><span class="lic">${icon(ok?"check":licon(ci,li))}</span><span class="nm">${lname(ci,li)}</span><span class="st">${ok?"Done":"Start"}</span></button></li>`}).join("");
