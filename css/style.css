@@ -48,7 +48,7 @@ main{padding:32px 0 80px;min-width:0}
 .panel h3{margin:0 0 4px;font-size:1.05rem}
 .panel p{margin:0;color:var(--muted);font-size:.92rem}
 .streak{display:flex;align-items:center;gap:14px}
-.streak .num{width:52px;height:52px;border-radius:50%;background:var(--linden-soft);color:var(--on-linden);display:grid;place-items:center;font:800 1.35rem "Bricolage Grotesque",sans-serif}
+.streak .num{flex:none;width:52px;height:52px;border-radius:50%;background:var(--linden-soft);color:var(--on-linden);display:grid;place-items:center;font:800 1.35rem "Bricolage Grotesque",sans-serif}
 :root[data-theme="dark"] .streak .num{color:var(--linden)}
 .goal{display:flex;align-items:center;gap:14px}
 .ring{--p:0;width:52px;height:52px;border-radius:50%;background:conic-gradient(var(--lake) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
