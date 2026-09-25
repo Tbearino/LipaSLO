@@ -1,11 +1,13 @@
 /* ---------------- COURSE CONTENT (edit here) ---------------- */
-const LV={A1:window.LIPA_A1,A2:window.LIPA_A2};
+const LV={A1:window.LIPA_A1,A2:window.LIPA_A2,B1:window.LIPA_B1};
 
-const LVINFO={A1:{d:"Beginner course, level A1",top:"Šmarna gora, 669 m"},A2:{d:"Elementary course, level A2",top:"Triglav, 2864 m"}};
+const LVINFO={A1:{d:"Beginner course, level A1",top:"Šmarna gora, 669 m"},A2:{d:"Elementary course, level A2",top:"Triglav, 2864 m"},B1:{d:"Intermediate course, level B1",top:"Grossglockner, 3798 m"}};
 let lvl=(()=>{try{const l=localStorage.getItem("lipa-level");if(l&&LV[l])return l}catch(e){}return"A1"})();
 let C=LV[lvl];
 const K=(ci,li)=>(lvl==="A1"?"":lvl+":")+ci+"-"+li;
 const LN=[{n:"New words",ic:"book"},{n:"More words",ic:"cards"},{n:"Conversation",ic:"chat"},{n:"Grammar",ic:"blocks"},{n:"Chapter review",ic:"flag"}];
+const lname=(ci,li)=>li===4&&C[ci]&&C[ci].r?"Read and write":LN[li].n;
+const licon=(ci,li)=>li===4&&C[ci]&&C[ci].r?"pen":LN[li].ic;
 
 /* ---------------- helpers ---------------- */
 const IC={
@@ -19,7 +21,9 @@ const IC={
  review:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
  close:'<path d="M6 6l12 12M18 6 6 18"/>',
  check:'<path d="m5 12 5 5 9-10"/>',
- chev:'<path d="m6 9 6 6 6-6"/>'
+ chev:'<path d="m6 9 6 6 6-6"/>',
+ pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+ slow:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
 };
 const icon=(n,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
 const LEAF='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21C6.5 17.6 3.5 13.8 3.5 9.9A4.4 4.4 0 0 1 12 8a4.4 4.4 0 0 1 8.5 1.9c0 3.9-3 7.7-8.5 11.1z"/></svg>';
@@ -91,14 +95,14 @@ function learnHTML(){
   const nx=nextLesson();
   if(nx&&!openCh.size)openCh.add(nx[0]);
   const hero=nx?`<section class="hero"><div class="leaf">${LEAF}</div>
-    <p class="meta">Chapter ${nx[0]+1}, ${LN[nx[1]].n.toLowerCase()}</p>
+    <p class="meta">Chapter ${nx[0]+1}, ${lname(nx[0],nx[1]).toLowerCase()}</p>
     <h2 class="sl">${C[nx[0]].t}</h2><p class="en">${C[nx[0]].e}</p>
     <button class="btn" data-start="${nx[0]}-${nx[1]}">${totalDone()?"Continue lesson":"Start your first lesson"}</button></section>`
    :`<section class="hero"><div class="leaf">${LEAF}</div><p class="meta">Course complete</p><h2 class="sl">Čestitke!</h2><p class="en">Congratulations, you've finished Slovenian ${lvl}. Keep your words fresh in Review.</p><button class="btn" data-view="review">Go to review</button></section>`;
   const tabs=["A1","A2","B1","B2"].map((l,i)=>`<button class="tab" role="tab" aria-selected="${l===lvl}" ${LV[l]?`data-lvl="${l}"`:'disabled title="Coming soon"'}>${l}</button>`).join("");
   const chs=C.map((c,ci)=>{
     const d=chDone(ci),p=d/5*100,cls=d===5?"full":d?"part":"";
-    const rows=LN.map((l,li)=>{const k=ci+"-"+li,ok=S.done[K(ci,li)];return`<li><button class="lrow ${ok?"done":""}" data-start="${k}"><span class="lic">${icon(ok?"check":l.ic)}</span><span class="nm">${l.n}</span><span class="st">${ok?"Done":"Start"}</span></button></li>`}).join("");
+    const rows=LN.map((l,li)=>{const k=ci+"-"+li,ok=S.done[K(ci,li)];return`<li><button class="lrow ${ok?"done":""}" data-start="${k}"><span class="lic">${icon(ok?"check":licon(ci,li))}</span><span class="nm">${lname(ci,li)}</span><span class="st">${ok?"Done":"Start"}</span></button></li>`}).join("");
     return`<li class="ch ${openCh.has(ci)?"open":""}"><div class="node ${cls}" style="--p:${p}"><span>${d===5?icon("check",18):ci+1}</span></div>
       <button class="chhead" data-ch="${ci}" aria-expanded="${openCh.has(ci)}"><span><h3>${c.t}</h3><span class="en">${c.e}</span></span><span class="cnt">${d} of 5</span><span class="chev">${icon("chev")}</span></button>
       <ul class="lessons">${rows}</ul></li>`}).join("");
@@ -153,10 +157,16 @@ function buildLesson(ci,li){
   if(li===2){
     const d=c.d,all=d.flatMap(x=>toks(x[1]));
     const idx=sh(d.map((_,i)=>i)),ord=idx.filter(i=>{const n=toks(d[i][1]).length;return n>=3&&n<=8});
-    return[{k:"dialog",d},gapStep(d[idx[0]],all),ord[0]!=null?orderStep(d[ord[0]]):null,gapStep(d[idx[1]],all),ord[1]!=null?orderStep(d[ord[1]]):null,meaningStep(d,idx[2])].filter(Boolean);
+    const sh7=idx.filter(i=>toks(d[i][1]).length<=7);const lst=sh7.length?{k:"listen",a:[d[sh7[sh7.length-1]][1]],hint:d[sh7[sh7.length-1]][2],say:d[sh7[sh7.length-1]][1]}:null;
+    return[{k:"dialog",d},gapStep(d[idx[0]],all),lst,ord[0]!=null?orderStep(d[ord[0]]):null,gapStep(d[idx[1]],all),ord[1]!=null?orderStep(d[ord[1]]):null,meaningStep(d,idx[2])].filter(Boolean);
   }
   if(li===3)return[{k:"gram",g:c.g},...c.g.q.map(drill)];
   const r=sh(ws);
+  if(c.r){
+    const rq=c.r.q.map(q=>({k:"mc",plainQ:true,q:q.p,o:sh(q.o),a:q.o[0],ctx:c.r.x}));
+    const mix=sh([mcStep(ci,r[0],"sl"),mcStep(ci,r[1],"en"),{k:"listen",a:[r[2].sl],hint:r[2].en,say:r[2].sl},typeStep(r[3]),...sh(c.g.q).slice(0,2).map(drill)]);
+    return[{k:"read",r:c.r},...rq,...mix,...(c.w?[{k:"write",w:c.w}]:[])];
+  }
   const st=[...r.slice(0,4).map((w,i)=>mcStep(ci,w,i%2?"en":"sl")),...r.slice(4,7).map(typeStep),...sh(c.g.q).slice(0,2).map(drill)];
   const ol=c.d.filter(x=>{const n=toks(x[1]).length;return n>=3&&n<=8});if(ol.length)st.push(orderStep(sh(ol)[0]));
   const out=sh(st);out.splice(4,0,matchStep(r.slice(7,12).length>=4?r.slice(7,12):r.slice(0,5)));return out;
@@ -183,19 +193,24 @@ function foot(mode,msg){
 }
 const enable=()=>{$("#go").disabled=false};
 function renderStep(){
-  const s=L.steps[L.i];L.sel=null;L.ord=[];L.m={l:null,ok:0,miss:0};
+  const s=L.steps[L.i];L.wrote=false;L.sel=null;L.ord=[];L.m={l:null,ok:0,miss:0};
   $("#barfill").style.width=(L.i/L.steps.length*100)+"%";
   const st=$("#stage");st.className="stage";st.innerHTML=R[s.k](s);
   $(".lbody").scrollTop=0;
   if(s.k==="card"){foot("next");say(s.w.sl)}
-  else if(s.k==="dialog"||s.k==="gram")foot("next");
+  else if(s.k==="dialog"||s.k==="gram"||s.k==="read")foot("next");
+  else if(s.k==="write"){foot("wait");const ta=$("#wr");ta.focus();ta.addEventListener("input",()=>{if(ta.value.trim().length>=10)wdone()})}
   else if(s.k==="match")foot("wait");
   else foot("check");
-  if(s.k==="type"){const inp=$("#ans");inp.focus();inp.addEventListener("input",()=>{$("#go").disabled=!inp.value.trim()})}
+  if(s.k==="listen")setTimeout(()=>say(s.a[0]),250);
+  if(s.k==="type"||s.k==="listen"){const inp=$("#ans");inp.focus();inp.addEventListener("input",()=>{$("#go").disabled=!inp.value.trim()})}
 }
 const R={
   card:s=>`<p class="q">New word</p><div class="big">${s.w.sl} ${sayBtn(s.w.sl)}</div><p class="trans">${s.w.en}</p>`,
-  mc:s=>`<p class="q">${s.plainQ?"Choose the right answer":s.q}</p>${s.plainQ?`<div class="big ${s.q.length>22?"long":""}">${s.q}</div>`:`<div class="big ${s.big.length>20?"long":""}">${s.big} ${s.bigSay?sayBtn(s.big):""}</div>`}<div class="opts">${s.o.map((o,i)=>`<button class="opt" data-opt="${i}">${o}</button>`).join("")}</div>`,
+  mc:s=>`${s.ctx?`<div class="ctx">${s.ctx}</div>`:""}<p class="q">${s.plainQ?(s.ctx?"Answer the question":"Choose the right answer"):s.q}</p>${s.plainQ?`<div class="big ${s.q.length>22?"long":""}">${s.q}</div>`:`<div class="big ${s.big.length>20?"long":""}">${s.big} ${s.bigSay?sayBtn(s.big):""}</div>`}<div class="opts">${s.o.map((o,i)=>`<button class="opt" data-opt="${i}">${o}</button>`).join("")}</div>`,
+  listen:s=>`<p class="q">Type what you hear</p><div class="big"><button class="say lg" data-say="${esc(s.a[0])}" aria-label="Play again">${icon("sound",26)}</button><button class="say lg" data-slow="${esc(s.a[0])}" aria-label="Play slowly">${icon("slow",24)}</button></div><input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" lang="sl" aria-label="What you heard"><div class="keys">${["č","š","ž"].map(k=>`<button data-key="${k}">${k}</button>`).join("")}</div>`,
+  read:s=>`<p class="q">Read the text. Tap the speaker to hear it.</p><h2 class="gh">${s.r.t} ${sayBtn(s.r.x)}</h2><div class="reading"><p>${s.r.x}</p></div>`,
+  write:s=>`<p class="q">Your turn to write</p><p class="wp">${s.w.p}</p><textarea class="ans wr" id="wr" rows="5" lang="sl" spellcheck="false" aria-label="Your text"></textarea><div class="keys">${["č","š","ž"].map(k=>`<button data-key="${k}">${k}</button>`).join("")}<button class="ghost" data-act="model">Show an example answer</button><button class="ghost" data-act="copy">Copy my text</button></div><div class="model" id="model"><b>Example:</b> ${s.w.m} ${sayBtn(s.w.m)}</div><p class="hint wn">Tip: send your text to a native speaker and ask them to correct it. That is how you learn the most.</p>`,
   gap:s=>`<p class="q">Fill in the gap</p><p class="sent">${s.p.replace("___",'<span class="blank" id="blank">&nbsp;</span>')}</p><p class="hint">${s.hint||""}</p><div class="opts row">${s.o.map((o,i)=>`<button class="opt" data-opt="${i}">${o}</button>`).join("")}</div>`,
   type:s=>`<p class="q">Write this in Slovenian</p><div class="big ${s.big.length>20?"long":""}">${s.big}</div><input class="ans" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" lang="sl" aria-label="Your answer"><div class="keys">${["č","š","ž"].map(k=>`<button data-key="${k}">${k}</button>`).join("")}</div>`,
   order:s=>`<p class="q">Put the words in order</p><p class="hint">${s.hint}</p><div class="ansline" id="al"></div><div class="bank">${s.tiles.map((t,i)=>`<button class="tile" data-tile="${i}">${t}</button>`).join("")}</div>`,
@@ -203,14 +218,15 @@ const R={
   dialog:s=>{const sp=uniq(s.d.map(x=>x[0]));return`<p class="q">Listen and read. Tap a line to see the translation.</p><button class="ghost" data-act="playall">${icon("sound",18)} Play conversation</button><div class="dl">${s.d.map(x=>`<div class="line ${sp.indexOf(x[0])%2?"r":""}"><button class="bub" data-bub><div class="who">${x[0]}</div><div class="s">${x[1]}</div><div class="e">${x[2]}</div></button>${sayBtn(x[1])}</div>`).join("")}</div>`},
   gram:s=>`<h2 class="gh">${s.g.t}</h2><div class="gbody">${s.g.h}</div>`
 };
-function answerText(s){if(s.k==="type")return s.a[0];return s.a}
+function answerText(s){if(s.k==="type"||s.k==="listen")return s.a[0];return s.a}
+function wdone(){if(L.wrote)return;L.wrote=true;L.correct++;enable()}
 function doCheck(){
   const s=L.steps[L.i];let ok=false,extra="";
   if(s.k==="mc"||s.k==="gap"){
     ok=s.o[L.sel]===s.a;
     document.querySelectorAll(".opt").forEach((b,i)=>{b.classList.remove("sel");if(s.o[i]===s.a)b.classList.add("right");else if(i===L.sel)b.classList.add("wrong")});
     if(s.k==="gap")$("#blank").textContent=s.a;
-  }else if(s.k==="type"){
+  }else if(s.k==="type"||s.k==="listen"){
     const v=$("#ans").value;
     if(s.a.some(a=>norm(a)===norm(v)))ok=true;
     else if(s.a.some(a=>plain(a)===plain(v))){ok=true;extra=`Watch the letters č, š and ž: <b>${s.a[0]}</b>`}
@@ -237,7 +253,7 @@ function finish(){
   const acc=Math.round(L.correct/Math.max(1,L.correct+L.wrong)*100);
   $("#barfill").style.width="100%";L.finished=true;
   if(!isReview&&L.li===4)openCh.clear();
-  $("#stage").innerHTML=`<div class="done">${LEAF}<h2>${isReview?"Review done":"Lesson complete"}</h2><p>${isReview?"Your words are fresher now.":C[L.ci].t+", "+LN[L.li].n.toLowerCase()}</p><div class="stats"><div><b>+${xp}</b><span>XP</span></div><div><b>${acc}%</b><span>accuracy</span></div><div><b>${S.streak}</b><span>day streak</span></div></div></div>`;
+  $("#stage").innerHTML=`<div class="done">${LEAF}<h2>${isReview?"Review done":"Lesson complete"}</h2><p>${isReview?"Your words are fresher now.":C[L.ci].t+", "+lname(L.ci,L.li).toLowerCase()}</p><div class="stats"><div><b>+${xp}</b><span>XP</span></div><div><b>${acc}%</b><span>accuracy</span></div><div><b>${S.streak}</b><span>day streak</span></div></div></div>`;
   foot("next");
 }
 
@@ -252,6 +268,8 @@ document.addEventListener("click",e=>{
   const a=t.closest("[data-act]");
   if(a){const act=a.dataset.act;
     if(act==="close")closeLesson();
+    if(act==="model"){$("#model").classList.add("show");if(L)wdone()}
+    if(act==="copy"){const v=($("#wr")||{}).value||"";try{navigator.clipboard.writeText(v).then(()=>toast("Copied. Paste it into a message to a native speaker."),()=>toast("Select the text and copy it manually."))}catch(e){toast("Select the text and copy it manually.")}}
     if(act==="review")startLesson(null,null,buildReview());
     if(act==="theme"){const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");const n=cur==="dark"?"light":"dark";document.documentElement.dataset.theme=n;try{localStorage.setItem("lipa-theme",n)}catch(e){}}
     if(act==="reset"){if(a.dataset.arm){S=def();save();openCh.clear();a.textContent="Reset progress";delete a.dataset.arm;render()}else{a.dataset.arm=1;a.textContent="Tap again to reset";setTimeout(()=>{if(a.dataset.arm){delete a.dataset.arm;a.textContent="Reset progress"}},3000)}}
@@ -260,7 +278,8 @@ document.addEventListener("click",e=>{
   if(!L||L.mode==="good"||L.mode==="bad")return;
   const s=L.steps[L.i];
   const op=t.closest("[data-opt]");if(op){L.sel=+op.dataset.opt;document.querySelectorAll(".opt").forEach(b=>b.classList.toggle("sel",b===op));if(s.k==="gap")$("#blank").textContent=s.o[L.sel];enable();return}
-  const ky=t.closest("[data-key]");if(ky){const inp=$("#ans"),p=inp.selectionStart??inp.value.length;inp.value=inp.value.slice(0,p)+ky.dataset.key+inp.value.slice(inp.selectionEnd??p);inp.focus();inp.setSelectionRange(p+1,p+1);enable();return}
+  const sl=t.closest("[data-slow]");if(sl){if(hasTTS){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(sl.dataset.slow);u.lang="sl-SI";if(voice)u.voice=voice;u.rate=.55;speechSynthesis.speak(u)}return}
+  const ky=t.closest("[data-key]");if(ky){const inp=$("#ans")||$("#wr"),p=inp.selectionStart??inp.value.length;inp.value=inp.value.slice(0,p)+ky.dataset.key+inp.value.slice(inp.selectionEnd??p);inp.focus();inp.setSelectionRange(p+1,p+1);enable();return}
   const bb=t.closest("[data-bub]");if(bb){bb.classList.toggle("show");return}
   const tl=t.closest("[data-tile]");if(tl){L.ord.push(+tl.dataset.tile);tl.classList.add("used");drawOrder();return}
   const rm=t.closest("[data-rm]");if(rm){const pos=+rm.dataset.rm,idx=L.ord.splice(pos,1)[0];document.querySelector(`[data-tile="${idx}"]`).classList.remove("used");drawOrder();return}
@@ -284,7 +303,7 @@ $("#go").addEventListener("click",()=>{if(!L)return;if(L.mode==="check")doCheck(
 document.addEventListener("keydown",e=>{
   if(!L)return;
   if(e.key==="Escape")closeLesson();
-  if(e.key==="Enter"&&!$("#go").disabled){e.preventDefault();$("#go").click()}
+  if(e.key==="Enter"&&e.target.tagName!=="TEXTAREA"&&!$("#go").disabled){e.preventDefault();$("#go").click()}
 });
 document.addEventListener("input",e=>{
   if(e.target.matches("[data-search]")){const q=e.target.value.toLowerCase().trim();
