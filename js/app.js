@@ -1,5 +1,5 @@
 /* ---------------- COURSE CONTENT (edit here) ---------------- */
-const LV={A1:window.LIPA_A1,A2:window.LIPA_A2,B1:window.LIPA_B1};
+const LV={A1:window.LIPA_A1,A2:window.LIPA_A2,B1:window.LIPA_B1,B2:window.LIPA_B2};};
 
 const LVINFO={
   A1:{d:"Beginner course, level A1",top:"Šmarna gora, 669 m"},
